@@ -1,0 +1,36 @@
+.jobPostPage {
+    width: 97%; // Takes up 100% of the parent container (which is 80% of the screen)
+    padding: 20px;
+  
+    .jobPostTable {
+      margin-top: 20px;
+      width: 100%; // Table takes up full width of the container
+      .tableHeader {
+        background-color: #EDF4FB;
+        .tableHeaderContent{
+          font-weight: 600;
+          font-size: 15px;
+          color: #0C1E5B;
+        }
+      }
+      .tableBodyConent{
+        font-size: 15px;
+        font-weight: 400;
+        color: #666666;
+        text-align: center;
+      }
+      
+    }
+  
+    .MuiDialogContent-root {
+      padding: 20px;
+    }
+  
+    .MuiTextField-root {
+      margin-bottom: 15px;
+    }
+  
+    .MuiDialogActions-root {
+      padding: 16px 24px;
+    }
+  }

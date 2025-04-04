@@ -1,0 +1,104 @@
+body{
+    margin: 0;
+    padding: 0;
+    height: 100%;
+}
+.fullPage{
+    display: flex;
+    height: 100vh;
+    .sideBar{
+        height: 100%;
+        width: 100%;
+        // background-color: beige;
+        .logoContainer{
+            display: flex;
+            justify-content: center;
+            img{
+                position: relative;
+                right: 25px;
+            }
+        }
+        .sideBarOptions{
+            .dashboard{
+                display: flex;
+                // padding-left: 10px;
+                justify-content: space-around;
+                cursor: pointer;
+                .logo{
+                    display: flex;
+                    align-items: center;
+                }
+                .contentText{
+                    position: relative;
+                    right: 80px;
+                }
+            }
+            .postJob{
+                display: flex;
+                justify-content: space-around;
+                cursor: pointer;
+                .logo{
+                    display: flex;
+                    align-items: center;
+                    position: relative;
+                    right: 6px;
+                }
+                .contentText{
+                    position: relative;
+                    right: 98px;
+                }
+            }
+            .companies{
+                display: flex;
+                justify-content: space-around;
+                cursor: pointer;
+                .logo{
+                    display: flex;
+                    align-items: center;
+                    position: relative;
+                    right: 4px;
+                }
+                .contentText{
+                    position: relative;
+                    right: 85px;
+                }
+            }
+            .applications{
+                display: flex;
+                justify-content: space-around;
+                cursor: pointer;
+                .logo{
+                    display: flex;
+                    align-items: center;
+                    position: relative;
+                    left: 2px;
+                    right: 0px;
+                }
+                .contentText{
+                    position: relative;
+                    right: 73px;
+                }
+            }
+            .users{
+                display: flex;
+                justify-content: space-around;
+                cursor: pointer;
+                .logo{
+                    display: flex;
+                    align-items: center;
+                    position: relative;
+                    right: 13px;
+                }
+                .contentText{
+                    position: relative;
+                    right: 115px;
+                }
+            }
+        }
+    }
+    .mainContent{
+        height: 100%;
+        width: 80%;
+        background-color: lightcyan;
+    }
+}

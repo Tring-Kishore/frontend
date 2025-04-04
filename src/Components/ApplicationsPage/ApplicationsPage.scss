@@ -1,0 +1,35 @@
+.applicationsPage {
+    padding: 20px;
+  
+    h1 {
+      margin-bottom: 20px;
+      font-size: 24px;
+      color: #333;
+    }
+    .tableHead {
+      background-color: #edf4fb;
+      .tableHeaderContent{
+        font-weight: 600;
+        font-size: 15px;
+        color: #0C1E5B;
+      }
+    }
+    .tableBodyConent{
+      font-size: 15px;
+      font-weight: 400;
+      color: #666666;
+    }
+  
+    .applicationsTable {
+      margin-top: 20px;
+    }
+  }
+  .jobDetails{
+    p{
+      display: flex;
+      // justify-content: space-between;
+      strong{
+        padding-right: 30px;
+      }
+    }
+  }
