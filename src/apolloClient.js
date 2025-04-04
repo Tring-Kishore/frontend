@@ -1,4 +1,4 @@
-import { ApolloClient, InMemoryCache, createHttpLink } from '@apollo/client';
+import { ApolloClient, InMemoryCache, createHttpLink, ApolloLink } from '@apollo/client';
 import { setContext } from '@apollo/client/link/context';
 
 const httpLink = createHttpLink({
@@ -15,8 +15,22 @@ const authLink = setContext((_, { headers }) => {
   };
 });
 
+const errorLink = new ApolloLink((operation, forward) => {
+  return forward(operation).map((response) => {
+    if (response.errors) {
+      response.errors.forEach((error) => {
+        if (error.message === 'User not found' || error.extensions?.code === 'UNAUTHENTICATED') {
+          localStorage.removeItem('token');
+          window.location.href = '/login';
+        }
+      });
+    }
+    return response;
+  });
+});
+
 const client = new ApolloClient({
-  link: authLink.concat(httpLink),
+  link: ApolloLink.from([authLink, errorLink, httpLink]),
   cache: new InMemoryCache(),
 });
 

@@ -151,9 +151,6 @@ const JobPostPage: React.FC = () => {
     },
   });
 
-  // const jobPosts = userType === "user"
-  // ? allJobPostsData?.allJobPosts || []
-  // : orgJobPostsData?.jobPosts || [];
 
   const jobPosts =
     userType === "user"

@@ -28,7 +28,7 @@ const SideBarOptions: SideBarOption[] = [
     id: 'postJob',
     label: 'Jobs',
     icon: WorkOutlineIcon,
-    roles: ['organization', 'user','admin'],
+    roles: ['organization', 'user',],
   },
   {
     id: 'companies',
