@@ -1,0 +1,129 @@
+.form-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    padding: 20px;
+    background: #dcdcdc66;
+    background-image: url('../../asserts/images/background-image-forms.svg');
+    position: relative;
+  
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1;
+    }
+  
+    form {
+      display: flex;
+      justify-content: center;
+      z-index: 1000;
+      width: 100%;
+  
+      .borderSignup {
+        border-width: 3px;
+        display: flex;
+        flex-direction: column;
+        inline-size: fit-content;
+        align-items: center;
+        padding: 35px;
+        border-radius: 12px;
+        width: 100%;
+        max-width: 460px;
+        background-color: white;
+  
+        .logoContainer {
+          display: flex;
+          justify-content: center;
+        }
+  
+        .detailsHeading {
+          font-size: 33px;
+          color: #303C6C;
+          margin-top: 15px;
+        }
+  
+        .form-group {
+          width: 100%;
+  
+          .SignUplabels {
+            padding-top: 15px;
+            padding-bottom: 3px;
+          }
+  
+          .SignUpinputs {
+            width: 100%;
+            height: 38px;
+            border: none;
+            outline-color: #303C6C;
+            border-bottom: lightgrey;
+            border-style: solid;
+            border-width: 2px;
+            border-top: none;
+            border-left: none;
+            border-right: none;
+  
+            &[type='textarea'] {
+              height: 100px;
+              resize: vertical;
+            }
+          }
+  
+          .file-upload-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+  
+            .file-upload-label {
+              padding: 8px 12px;
+              background-color: #303C6C;
+              color: white;
+              border-radius: 5px;
+              cursor: pointer;
+              transition: background-color 0.3s;
+  
+              &:hover {
+                background-color: #1e2a4a;
+              }
+            }
+  
+            .file-upload-input {
+              display: none; // Hide the default file input
+            }
+  
+            .file-upload-text {
+              color: #666;
+            }
+          }
+        }
+  
+        .submit-btn-div {
+          padding-top: 25px;
+          width: 100%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+  
+          .btnSubmit {
+            width: 100%;
+            height: 40px;
+            background-color: #303C6C;
+            color: #FAFAFA;
+            border: none;
+            cursor: pointer;
+            font-size: large;
+            max-width: 375px;
+  
+            &:hover {
+              opacity: 0.9;
+            }
+          }
+        }
+      }
+    }
+  }

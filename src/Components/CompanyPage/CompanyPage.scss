@@ -1,0 +1,65 @@
+.companyPage {
+    padding: 20px;
+
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+      font-size: 2rem;
+      color: #333;
+    }
+    .btns{
+      display: flex;
+      justify-content: start;
+      padding-right: 15px;
+    }
+    .companyTable {
+      margin-top: 20px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      .tableHead {
+        background-color: #edf4fb;
+        .tableHeaderContent{
+          font-weight: 600;
+          font-size: 15px;
+          color: #0C1E5B;
+        }
+      }
+      .tableBodyConent{
+        font-size: 15px;
+        font-weight: 400;
+        color: #666666;
+      }
+      .MuiTableRow-root {
+        transition: background-color 0.3s ease;
+  
+        &:hover {
+          background-color: #f5f5f5;
+        }
+      }
+  
+      .MuiTableCell-root {
+        font-size: 1rem;
+      }
+    }
+  
+    .companyDetails {
+      p {
+        margin: 10px 0;
+        font-size: 1.1rem;
+        color: #555;
+  
+        strong {
+          color: #333;
+          font-weight: 600;
+        }
+      }
+  
+      a {
+        color: #1976d2;
+        text-decoration: none;
+  
+        &:hover {
+          text-decoration: underline;
+        }
+      }
+    }
+  }
