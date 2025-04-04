@@ -15,6 +15,7 @@ export const GET_ALL_APPLICATIONS = gql`
       company
       openings
       skills
+      resumeKey
     }
   }
 `;

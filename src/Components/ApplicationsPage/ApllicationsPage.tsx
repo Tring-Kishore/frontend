@@ -10,6 +10,8 @@ import { GET_ALL_APPLICATIONS, GET_ALL_USER_APPLICATIONS, UPDATE_APPLICATION_STA
 import toast from 'react-hot-toast';
 import Loader from '../Loader/Loader';
 import { WITHDRAW_APPLICATION } from './ApplicationPageAPI/ApplicationPageAPI';
+import {GET_DOWNLOAD_RESUME_URL} from '../UserDetails/UserDetailsAPI/UserDetailsAPI'
+import client from '../../apolloClient';
 type UserRole = 'user' | 'organization';
 
 interface JobApplication {
@@ -34,6 +36,7 @@ interface Applicant {
   job_title: string;
   skills: string;
   status: string;
+  resumeKey:string;
 }
 
 const ApplicationsPage: React.FC = () => {
@@ -215,6 +218,28 @@ const ApplicationsPage: React.FC = () => {
       }
     }
   };
+
+  const handleDownloadResume = async (fileName: any) => {
+    if (!fileName) return;
+
+    try {
+      const { data } = await client.query({
+        query: GET_DOWNLOAD_RESUME_URL,
+        variables: {
+          input: {
+            bucket: "jobportal-media-resume",
+            key: fileName,
+          },
+        },
+        fetchPolicy: "network-only",
+      });
+
+      window.open(data.generateDownloadUrl.downloadUrl, "_blank");
+    } catch (error) {
+      console.error("Error downloading resume:", error);
+      toast.error("Failed to download resume.");
+    }
+  };
   
 
   if (loading) return <Loader/>;
@@ -347,6 +372,7 @@ const ApplicationsPage: React.FC = () => {
               <p><strong>Job Role:</strong> {selectedApplicant.job_title}</p>
               <p><strong>Skills:</strong> {selectedApplicant.skills}</p>
               <p><strong>Status:</strong> {selectedApplicant.status}</p>
+              <p><strong>Resume:</strong><Button variant='outlined' sx={{marginLeft:'10px'}} onClick={() => handleDownloadResume(selectedApplicant.resumeKey)}> Resume</Button>  </p>
             </div>
           </DialogContent>
           <DialogActions>
