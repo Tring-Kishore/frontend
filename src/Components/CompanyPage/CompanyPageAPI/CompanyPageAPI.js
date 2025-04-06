@@ -25,29 +25,7 @@ export const GET_ALL_ORGANIZATIONS = gql`
   }
 `;
 
-export const GET_REQUESTED_COMPANIES = gql`
-  query GetRequestedCompanies {
-    getRequestedCompanies {
-      id
-      website
-      description
-      status
-      location
-      created_at
-      updated_at
-      deleted_at
-      organization_id
-      update_password_state
-      user {
-        id
-        name
-        email
-        phone
-        role
-      }
-    }
-  }
-`;
+
 
 
 export const UPDATE_ORGANIZATION_STATUS = gql`

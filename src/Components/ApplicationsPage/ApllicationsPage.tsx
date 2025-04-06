@@ -372,7 +372,7 @@ const ApplicationsPage: React.FC = () => {
               <p><strong>Job Role:</strong> {selectedApplicant.job_title}</p>
               <p><strong>Skills:</strong> {selectedApplicant.skills}</p>
               <p><strong>Status:</strong> {selectedApplicant.status}</p>
-              <p><strong>Resume:</strong><Button variant='outlined' sx={{marginLeft:'10px'}} onClick={() => handleDownloadResume(selectedApplicant.resumeKey)}> Resume</Button>  </p>
+              <p><strong>Resume:</strong><Button variant='outlined' sx={{marginLeft:'10px'}} onClick={() => handleDownloadResume(selectedApplicant.resumeKey)}> Download</Button>  </p>
             </div>
           </DialogContent>
           <DialogActions>

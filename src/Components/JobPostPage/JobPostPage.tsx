@@ -16,6 +16,12 @@ import {
   TablePagination,
   Grid,
   MenuItem,
+  Chip,
+  Box,
+  InputLabel,
+  Select,
+  FormControl,
+  SelectChangeEvent,
 } from "@mui/material";
 import { useQuery, useMutation } from "@apollo/client";
 import {
@@ -25,7 +31,7 @@ import {
   APPLY_FOR_JOB_MUTATION,
   UPDATE_JOB_POST_MUTATION,
   GET_ADMIN_JOB_POSTS_QUERY,
-  UPDATE_JOB_POST_STATUS_MUTATION
+  UPDATE_JOB_POST_STATUS_MUTATION,
 } from "./JobPostPageAPI/JobPostPageAPI";
 import "./JobPostPage.scss";
 import { jwtDecode } from "jwt-decode";
@@ -33,6 +39,7 @@ import toast from "react-hot-toast";
 import RemoveRedEyeIcon from "@mui/icons-material/RemoveRedEye";
 import CreateIcon from "@mui/icons-material/Create";
 import Loader from "../Loader/Loader";
+import { Label } from "@mui/icons-material";
 
 type UserRole = "user" | "organization" | "admin";
 
@@ -58,6 +65,7 @@ const JobPostPage: React.FC = () => {
   const [openAddDialog, setOpenAddDialog] = useState(false);
   const [openEditDialog, setOpenEditDialog] = useState(false);
   const [selectedJob, setSelectedJob] = useState<JobPost | null>(null);
+  const [skills, setSkills] = useState<string[]>([]);
   const [formData, setFormData] = useState<JobPost>({
     id: "",
     job_title: "",
@@ -70,12 +78,14 @@ const JobPostPage: React.FC = () => {
     skills: "",
     organization_id: "",
     organization_name: "",
-    status:"requested"
+    status: "requested",
   });
 
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [statusFilter, setStatusFilter] = useState<string>("all");
+
+  // GraphQL queries
   const {
     data: adminJobPostsData,
     refetch: refetchAdminJobPosts,
@@ -87,6 +97,7 @@ const JobPostPage: React.FC = () => {
     },
     skip: userType !== "admin",
   });
+
   const {
     data: orgJobPostsData,
     refetch: refetchOrgJobPosts,
@@ -105,11 +116,13 @@ const JobPostPage: React.FC = () => {
     data: allJobPostsData,
     refetch: refetchAllJobPosts,
     loading: allJobPostsLoading,
+    error,
   } = useQuery(GET_JOB_ALL_POSTS_QUERY, {
     fetchPolicy: "network-only",
     skip: userType !== "user",
   });
 
+  // GraphQL mutations
   const [addJobPost] = useMutation(ADD_JOB_POST_MUTATION, {
     fetchPolicy: "network-only",
     onCompleted: () => {
@@ -151,7 +164,19 @@ const JobPostPage: React.FC = () => {
     },
   });
 
+  const [updateJobPostStatus] = useMutation(UPDATE_JOB_POST_STATUS_MUTATION, {
+    fetchPolicy: "network-only",
+    onCompleted: () => {
+      refetchAdminJobPosts();
+      toast.success("Job post status updated successfully");
+      setSelectedJob(null);
+    },
+    onError: (err) => {
+      toast.error(`Failed to update job post status: ${err.message}`);
+    },
+  });
 
+  // Data processing
   const jobPosts =
     userType === "user"
       ? allJobPostsData?.allJobPosts || []
@@ -159,6 +184,12 @@ const JobPostPage: React.FC = () => {
       ? orgJobPostsData?.jobPosts || []
       : adminJobPostsData?.adminJobPosts || [];
 
+  const paginatedJobPosts = jobPosts.slice(
+    page * rowsPerPage,
+    page * rowsPerPage + rowsPerPage
+  );
+
+  // Handlers
   const handleChangePage = (event: unknown, newPage: number) => {
     setPage(newPage);
   };
@@ -169,11 +200,6 @@ const JobPostPage: React.FC = () => {
     setRowsPerPage(parseInt(event.target.value));
     setPage(0);
   };
-
-  const paginatedJobPosts = jobPosts.slice(
-    page * rowsPerPage,
-    page * rowsPerPage + rowsPerPage
-  );
 
   const handleOpenAddDialog = () => {
     setFormData({
@@ -188,8 +214,9 @@ const JobPostPage: React.FC = () => {
       skills: "",
       organization_id: "",
       organization_name: "",
-      status:"requested"
+      status: "requested",
     });
+    setSkills([]);
     setOpenAddDialog(true);
   };
 
@@ -200,6 +227,7 @@ const JobPostPage: React.FC = () => {
   const handleOpenEditDialog = (job: JobPost) => {
     setSelectedJob(job);
     setFormData(job);
+    setSkills(job.skills ? job.skills.split(",") : []);
     setOpenEditDialog(true);
   };
 
@@ -211,15 +239,42 @@ const JobPostPage: React.FC = () => {
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: value,
+    setFormData((prev) => ({ ...prev, [name as string]: value as string }));
+  };
+  const handleSelectChange = (event: SelectChangeEvent) => {
+    const { name, value } = event.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name as string]: value as string,
     }));
+  };
+  const handleSkillsInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { value } = e.target;
+    setFormData((prev) => ({ ...prev, skills: value }));
+  };
+
+  const handleSkillsKeyDown = (e: React.KeyboardEvent) => {
+    if ((e.key === "Enter" || e.key === ",") && formData.skills.trim()) {
+      e.preventDefault();
+      const newSkill = formData.skills.trim().replace(/,/g, "");
+      if (newSkill && !skills.includes(newSkill)) {
+        setSkills((prev) => [...prev, newSkill]);
+        setFormData((prev) => ({ ...prev, skills: "" }));
+      }
+    }
+  };
+
+  const handleRemoveSkill = (skillToRemove: string) => {
+    setSkills((prev) => prev.filter((skill) => skill !== skillToRemove));
   };
 
   const handleAddPost = async () => {
-    const validationError = validateJobPost(formData);
+    const submissionData = {
+      ...formData,
+      skills: skills.join(","),
+    };
 
+    const validationError = validateJobPost(submissionData);
     if (validationError) {
       toast.error(validationError);
       return;
@@ -229,14 +284,14 @@ const JobPostPage: React.FC = () => {
       await addJobPost({
         variables: {
           input: {
-            job_title: formData.job_title,
-            category: formData.category,
-            openings: formData.openings,
-            experience: formData.experience,
-            description: formData.description,
-            package: formData.package,
-            language: formData.language,
-            skills: formData.skills,
+            job_title: submissionData.job_title,
+            category: submissionData.category,
+            openings: submissionData.openings,
+            experience: submissionData.experience,
+            description: submissionData.description,
+            package: submissionData.package,
+            language: submissionData.language,
+            skills: submissionData.skills,
             organization_id: decoded.userId,
           },
         },
@@ -248,52 +303,43 @@ const JobPostPage: React.FC = () => {
   };
 
   const handleUpdatePost = async () => {
-    const validationError = validateJobPost(formData);
+    const submissionData = {
+      ...formData,
+      skills: skills.join(","),
+    };
 
+    const validationError = validateJobPost(submissionData);
     if (validationError) {
       toast.error(validationError);
       return;
     }
 
-    const variables = {
-      input: {
-        id: formData.id,
-        job_title: formData.job_title,
-        category: formData.category,
-        openings: formData.openings,
-        experience: formData.experience,
-        description: formData.description,
-        package: formData.package,
-        language: formData.language,
-        skills: formData.skills,
+    await updateJobPost({
+      variables: {
+        input: {
+          id: submissionData.id,
+          job_title: submissionData.job_title,
+          category: submissionData.category,
+          openings: submissionData.openings,
+          experience: submissionData.experience,
+          description: submissionData.description,
+          package: submissionData.package,
+          language: submissionData.language,
+          skills: submissionData.skills,
+        },
       },
-    };
-
-    await updateJobPost({ variables });
+    });
   };
 
-  const [updateJobPostStatus] = useMutation(UPDATE_JOB_POST_STATUS_MUTATION, {
-    fetchPolicy: "network-only",
-    onCompleted: () => {
-      refetchAdminJobPosts();
-      toast.success("Job post status updated successfully");
-      setSelectedJob(null);
-    },
-    onError: (err) => {
-      toast.error(`Failed to update job post status: ${err.message}`);
-    },
-  });
-  
   const handleUpdateStatus = async (status: string) => {
-    if(selectedJob)
-    {
+    if (selectedJob) {
       await updateJobPostStatus({
         variables: {
           input: {
-            id : selectedJob.id,
-            status
-          }
-        }
+            id: selectedJob.id,
+            status,
+          },
+        },
       });
     }
   };
@@ -308,15 +354,15 @@ const JobPostPage: React.FC = () => {
 
   const handleApply = async () => {
     if (selectedJob) {
-      const variables = {
-        input: {
-          jobpost_id: selectedJob.id,
-          user_id: decoded.userId,
-          organization_id: selectedJob.organization_id,
+      await applyForJob({
+        variables: {
+          input: {
+            jobpost_id: selectedJob.id,
+            user_id: decoded.userId,
+            organization_id: selectedJob.organization_id,
+          },
         },
-      };
-
-      await applyForJob({ variables });
+      });
     }
   };
 
@@ -328,7 +374,7 @@ const JobPostPage: React.FC = () => {
     if (!formData.description.trim()) return "Description is required.";
     if (!formData.package.trim()) return "Package is required.";
     if (!formData.language.trim()) return "Language is required.";
-    if (!formData.skills.trim()) return "Skills are required.";
+    if (skills.length === 0) return "At least one skill is required.";
 
     if (isNaN(Number(formData.openings)) || Number(formData.openings) <= 0) {
       return "Openings must be a valid number greater than 0.";
@@ -340,13 +386,36 @@ const JobPostPage: React.FC = () => {
     return null;
   };
 
+  const jobTitleOptions = [
+    { value: "Software Engineer", label: "Software Engineer" },
+    { value: "Ui/Ux Designer", label: "Ui/Ux Designer" },
+    { value: "Backend Developer", label: "Backend Developer" },
+    { value: "Testing", label: "Testing" },
+    { value: "Frontend Developer", label: "Frontend Developer" },
+  ];
+
+  const categoryOptions = [
+    { value: "Full time", label: "Full Time" },
+    { value: "Part time", label: "Part Time" },
+    { value: "Work From Home", label: "Work From Home" },
+  ];
+
+  const experienceOptions = [
+    { value: "1+ Years", label: "1+ Years" },
+    { value: "2+ Years", label: "2+ Years" },
+    { value: "3+ Years", label: "3+ Years" },
+    { value: "4+ Years", label: "4+ Years" },
+    { value: "5+ Years", label: "5+ Years" },
+    { value: "6+ Years", label: "6+ Years" },
+    { value: "7+ Years", label: "7+ Years" },
+    { value: "8+ Years", label: "8+ Years" },
+  ];
+
   useEffect(() => {
     if (openEditDialog) {
       handleCloseViewDialog();
     }
   }, [openEditDialog]);
-
-  // if (loading) return <Loader />;
 
   return (
     <div className="jobPostPage">
@@ -359,6 +428,7 @@ const JobPostPage: React.FC = () => {
           Add Post
         </Button>
       )}
+
       {paginatedJobPosts.length > 0 ? (
         <TableContainer component={Paper} className="jobPostTable">
           <Table>
@@ -503,6 +573,7 @@ const JobPostPage: React.FC = () => {
         </div>
       )}
 
+      {/* Add Job Dialog */}
       {userType === "organization" && (
         <Dialog
           open={openAddDialog}
@@ -515,24 +586,60 @@ const JobPostPage: React.FC = () => {
             <form>
               <Grid container spacing={2}>
                 <Grid item xs={12} sm={6}>
-                  <TextField
+                  <FormControl fullWidth margin="normal">
+                    <InputLabel id="job-title-label">Job Title</InputLabel>
+                    <Select
+                      labelId="job-title-label"
+                      id="job_title"
+                      name="job_title"
+                      value={formData.job_title}
+                      label="Job Title"
+                      onChange={handleSelectChange}
+                    >
+                      {jobTitleOptions.map((job) => (
+                        <MenuItem key={job.value} value={job.value}>
+                          {job.label}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+
+                  {/* <TextField
                     fullWidth
                     margin="normal"
                     label="Job Title"
                     name="job_title"
                     value={formData.job_title}
                     onChange={handleInputChange}
-                  />
+                  /> */}
                 </Grid>
                 <Grid item xs={12} sm={6}>
-                  <TextField
+                  <FormControl fullWidth margin="normal">
+                    <InputLabel id="jobpost-category">Category</InputLabel>
+                    <Select
+                      labelId="jobpost-category"
+                      id="category"
+                      name="category"
+                      value={formData.category}
+                      label="Category"
+                      onChange={handleSelectChange}
+                    >
+                      {categoryOptions.map((category) => (
+                        <MenuItem key={category.value} value={category.value}>
+                          {category.label}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+
+                  {/* <TextField
                     fullWidth
                     margin="normal"
                     label="Category"
                     name="category"
                     value={formData.category}
                     onChange={handleInputChange}
-                  />
+                  /> */}
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <TextField
@@ -545,14 +652,32 @@ const JobPostPage: React.FC = () => {
                   />
                 </Grid>
                 <Grid item xs={12} sm={6}>
-                  <TextField
+                  <FormControl fullWidth margin="normal">
+                    <InputLabel id="jobpost-experience">Experience</InputLabel>
+                    <Select
+                      labelId="jobpost-experience"
+                      id="experience"
+                      name="experience"
+                      label="Experience"
+                      value={formData.experience}
+                      onChange={handleSelectChange}
+                    >
+                      {experienceOptions.map((exp) => (
+                        <MenuItem key={exp.value} value={exp.value}>
+                          {exp.label}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+
+                  {/* <TextField
                     fullWidth
                     margin="normal"
                     label="Experience"
                     name="experience"
                     value={formData.experience}
                     onChange={handleInputChange}
-                  />
+                  /> */}
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <TextField
@@ -574,15 +699,29 @@ const JobPostPage: React.FC = () => {
                     onChange={handleInputChange}
                   />
                 </Grid>
-                <Grid item xs={12} sm={6}>
+                <Grid item xs={12}>
                   <TextField
                     fullWidth
                     margin="normal"
                     label="Skills"
                     name="skills"
                     value={formData.skills}
-                    onChange={handleInputChange}
+                    onChange={handleSkillsInput}
+                    onKeyDown={handleSkillsKeyDown}
+                    placeholder="Type skills and press Enter or comma"
                   />
+                  <Box
+                    sx={{ display: "flex", flexWrap: "wrap", gap: 1, mt: 1 }}
+                  >
+                    {skills.map((skill) => (
+                      <Chip
+                        key={skill}
+                        label={skill}
+                        onDelete={() => handleRemoveSkill(skill)}
+                        sx={{ margin: "2px" }}
+                      />
+                    ))}
+                  </Box>
                 </Grid>
                 <Grid item xs={12}>
                   <TextField
@@ -610,6 +749,7 @@ const JobPostPage: React.FC = () => {
         </Dialog>
       )}
 
+      {/* Edit Job Dialog */}
       {userType === "organization" && (
         <Dialog
           open={openEditDialog}
@@ -623,23 +763,46 @@ const JobPostPage: React.FC = () => {
               <Grid container spacing={2}>
                 <Grid item xs={12} sm={6}>
                   <TextField
+                    select 
                     fullWidth
                     margin="normal"
                     label="Job Title"
                     name="job_title"
                     value={formData.job_title}
                     onChange={handleInputChange}
-                  />
+                  >
+                    {jobTitleOptions.map((job) => (
+                      <MenuItem key={job.value} value={job.value}>
+                        {job.label}
+                      </MenuItem>
+                    ))}
+                  </TextField>
+
+                  {/* <TextField
+                    fullWidth
+                    margin="normal"
+                    label="Job Title"
+                    name="job_title"
+                    value={formData.job_title}
+                    onChange={handleInputChange}
+                  /> */}
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <TextField
+                    select
                     fullWidth
                     margin="normal"
                     label="Category"
                     name="category"
                     value={formData.category}
                     onChange={handleInputChange}
-                  />
+                  >
+                    {categoryOptions.map((category) => (
+                      <MenuItem key={category.value} value={category.value}>
+                        {category.label}
+                      </MenuItem>
+                    ))}
+                    </TextField>
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <TextField
@@ -650,16 +813,23 @@ const JobPostPage: React.FC = () => {
                     value={formData.openings}
                     onChange={handleInputChange}
                   />
+                    
+                    
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <TextField
+                    select
                     fullWidth
                     margin="normal"
                     label="Experience"
                     name="experience"
                     value={formData.experience}
                     onChange={handleInputChange}
-                  />
+                  >
+                    {experienceOptions.map((exp)=> (
+                      <MenuItem key={exp.value} value={exp.value}>{exp.label}</MenuItem>
+                    ))}
+                    </TextField>
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <TextField
@@ -681,15 +851,29 @@ const JobPostPage: React.FC = () => {
                     onChange={handleInputChange}
                   />
                 </Grid>
-                <Grid item xs={12} sm={6}>
+                <Grid item xs={12}>
                   <TextField
                     fullWidth
                     margin="normal"
                     label="Skills"
                     name="skills"
-                    value={formData.skills}
-                    onChange={handleInputChange}
+                    // value={formData.skills}
+                    onChange={handleSkillsInput}
+                    onKeyDown={handleSkillsKeyDown}
+                    placeholder="Type skills and press Enter or comma"
                   />
+                  <Box
+                    sx={{ display: "flex", flexWrap: "wrap", gap: 1, mt: 1 }}
+                  >
+                    {skills.map((skill) => (
+                      <Chip
+                        key={skill}
+                        label={skill}
+                        onDelete={() => handleRemoveSkill(skill)}
+                        sx={{ margin: "2px" }}
+                      />
+                    ))}
+                  </Box>
                 </Grid>
                 <Grid item xs={12}>
                   <TextField
@@ -721,6 +905,7 @@ const JobPostPage: React.FC = () => {
         </Dialog>
       )}
 
+      {/* View Job Dialog */}
       <Dialog
         open={Boolean(selectedJob) && !openEditDialog}
         onClose={handleCloseViewDialog}
@@ -784,9 +969,7 @@ const JobPostPage: React.FC = () => {
                 Reject
               </Button>
               <Button
-                onClick={() =>
-                  handleUpdateStatus("waiting_list")
-                }
+                onClick={() => handleUpdateStatus("waiting_list")}
                 color="secondary"
               >
                 Waiting List
