@@ -51,6 +51,7 @@ export const GET_JOB_POSTS_QUERY = gql`
       language
       skills
       organization_id
+      status
     }
   }
 `;

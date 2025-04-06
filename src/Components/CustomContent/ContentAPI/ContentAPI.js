@@ -13,6 +13,7 @@ export const GET_JOB_ALL_POSTS_QUERY = gql`
         skills
         organization_id
         organization_name
+        status
       }
     }`
   ;
