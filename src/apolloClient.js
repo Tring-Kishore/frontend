@@ -1,5 +1,7 @@
 import { ApolloClient, InMemoryCache, createHttpLink, ApolloLink } from '@apollo/client';
 import { setContext } from '@apollo/client/link/context';
+import { onError } from '@apollo/client/link/error';
+import { GraphQLError } from 'graphql';
 
 const httpLink = createHttpLink({
   uri: 'http://localhost:4000/graphql',
@@ -15,23 +17,19 @@ const authLink = setContext((_, { headers }) => {
   };
 });
 
-const errorLink = new ApolloLink((operation, forward) => {
-  return forward(operation).map((response) => {
-    if (response.errors) {
-      response.errors.forEach((error) => {
-        if (error.message === 'User not found' || error.extensions?.code === 'UNAUTHENTICATED') {
-          localStorage.removeItem('token');
-          window.location.href = '/login';
-        }
-      });
-    }
-    return response;
-  });
-});
-
 const client = new ApolloClient({
-  link: ApolloLink.from([authLink, errorLink, httpLink]),
+  link: authLink.concat(httpLink),
   cache: new InMemoryCache(),
+  defaultOptions: {
+    watchQuery: {
+      fetchPolicy: 'network-only',
+      errorPolicy: 'all',
+    },
+    query: {
+      fetchPolicy: 'network-only',
+      errorPolicy: 'all',
+    },
+  }
 });
 
 export default client;

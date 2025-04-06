@@ -5,7 +5,7 @@ import {
   TablePagination, Box, Tabs, Tab,
 } from '@mui/material';
 import './CompanyPage.scss';
-import { GET_ALL_ORGANIZATIONS, GET_REQUESTED_COMPANIES, UPDATE_ORGANIZATION_STATUS, DELETE_ONE_ORGANIZATION } from './CompanyPageAPI/CompanyPageAPI';
+import { GET_ALL_ORGANIZATIONS, UPDATE_ORGANIZATION_STATUS, DELETE_ONE_ORGANIZATION } from './CompanyPageAPI/CompanyPageAPI';
 import { useQuery, useMutation } from '@apollo/client';
 import toast from 'react-hot-toast';
 import Loader from '../Loader/Loader';
@@ -30,14 +30,13 @@ interface Company {
 
 const CompanyPage: React.FC = () => {
   const { data: allCompaniesData, loading: allCompaniesLoading, error: allCompaniesError, refetch: refetchAllCompanies } = useQuery(GET_ALL_ORGANIZATIONS, { fetchPolicy: 'network-only' });
-  const { data: requestedCompaniesData, loading: requestedCompaniesLoading, error: requestedCompaniesError, refetch: refetchRequestedCompanies } = useQuery(GET_REQUESTED_COMPANIES, { fetchPolicy: 'network-only' });
   
   const [updateOrganizationStatus] = useMutation(UPDATE_ORGANIZATION_STATUS, {
     fetchPolicy: 'network-only',
     onCompleted: () => {
       toast.success('Updated organization status');
       handleCloseDialog();
-      refetchRequestedCompanies();
+     
       refetchAllCompanies();
     },
     onError: (error) => {
@@ -51,7 +50,7 @@ const CompanyPage: React.FC = () => {
     onCompleted: () => {
       toast.success('Organization deleted successfully');
       handleCloseDialog();
-      refetchRequestedCompanies();
+      
       refetchAllCompanies();
     },
     onError: (error) => {
@@ -66,9 +65,9 @@ const CompanyPage: React.FC = () => {
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [activeTab, setActiveTab] = useState(0);
 
-  if (allCompaniesLoading || requestedCompaniesLoading) return <Loader />;
+  if (allCompaniesLoading) return <Loader />;
   if (allCompaniesError) return <p>Error: {allCompaniesError.message}</p>;
-  if (requestedCompaniesError) return <p>Error: {requestedCompaniesError.message}</p>;
+  
 
   const allCompanies = allCompaniesData?.getAllOrganizations || [];
   

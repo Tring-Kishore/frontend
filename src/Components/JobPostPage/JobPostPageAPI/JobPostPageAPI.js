@@ -14,9 +14,12 @@ import { gql } from '@apollo/client';
         skills
         organization_id
         organization_name
+        status
       }
     }`
   ;
+
+  
 
 // export const GET_JOB_POSTS_QUERY = gql`
 //   query GetJobPosts($organization_id: ID) {
