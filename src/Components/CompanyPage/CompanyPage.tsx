@@ -9,7 +9,7 @@ import { GET_ALL_ORGANIZATIONS, UPDATE_ORGANIZATION_STATUS, DELETE_ONE_ORGANIZAT
 import { useQuery, useMutation } from '@apollo/client';
 import toast from 'react-hot-toast';
 import Loader from '../Loader/Loader';
-import { BorderBottom } from '@mui/icons-material';
+
 
 interface Company {
   id: string;

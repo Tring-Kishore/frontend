@@ -70,7 +70,9 @@ type FormData = {
 const SignIn = () => {
   const navigate = useNavigate();
   const [showLoader, setShowLoader] = useState(false);
-
+  const gotoDashboard = () => {
+    navigate('/dashboard');
+  }
   const [login, { loading }] = useMutation(LOGIN_MUTATION, {
     onCompleted: (data) => {
       console.log('the token in frontend',data);
@@ -93,12 +95,12 @@ const SignIn = () => {
             navigate('/update-password');
           } else {
             console.log('Navigating to /dashboard');
-            navigate('/dashboard');
+            gotoDashboard();
           }
         } else if (role === 'user') {
-          navigate('/dashboard');
+          gotoDashboard();
         } else if (role === 'admin') {
-          navigate('/dashboard');
+          gotoDashboard();
         }
       }, 4000);
     },
@@ -133,8 +135,8 @@ const SignIn = () => {
     });
   };
 
-  const fields = Fields.filter((field) => field.role.includes('organization'));
-
+  const fields = Fields.filter((field) => field.role);
+  if (loading) return <Loader/>;
   return (
     <>
       {showLoader && <LoginLoader />}

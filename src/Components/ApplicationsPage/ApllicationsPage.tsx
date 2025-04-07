@@ -12,6 +12,7 @@ import Loader from '../Loader/Loader';
 import { WITHDRAW_APPLICATION } from './ApplicationPageAPI/ApplicationPageAPI';
 import {GET_DOWNLOAD_RESUME_URL} from '../UserDetails/UserDetailsAPI/UserDetailsAPI'
 import client from '../../apolloClient';
+import { useNavigate } from 'react-router-dom';
 type UserRole = 'user' | 'organization';
 
 interface JobApplication {
@@ -40,15 +41,35 @@ interface Applicant {
 }
 
 const ApplicationsPage: React.FC = () => {
-  const token: any = localStorage.getItem('token');
-  const decoded: any = jwtDecode(token);
-  const userType: UserRole = decoded.role;
-  const organizationId = decoded.userId;
-  const userId = decoded.userId;
+  const navigate = useNavigate();
+  const [userType,setUserType] = useState();
+  const [userId,setUserId] = useState();
+  const [organizationId,setOrganizationId] = useState();
+  useEffect(() => {
+        
+        const token = localStorage.getItem('token');
+        if (token) {
+          try {
+            const decoded: any = jwtDecode(token);
+            setUserType(decoded.role);
+            setUserId(decoded.userId);
+            if(decoded.role === 'organization'){
+              setOrganizationId(decoded.userId);
+            }
+          } catch (error) {
+            console.error('Error decoding token:', error);
+            
+            localStorage.removeItem('token');
+            navigate('/signin');
+          }
+        }
+      }, [navigate]);
+  
 
-  console.log('Decoded Token:', decoded);
 
-  const { data: jobPostsData, loading, error } = useQuery(
+
+
+  const { data: jobPostsData, loading } = useQuery(
     userType === 'user' ? GET_ALL_USER_APPLICATIONS : GET_ALL_APPLICATIONS,
     {
       fetchPolicy: 'network-only',
@@ -227,7 +248,6 @@ const ApplicationsPage: React.FC = () => {
         query: GET_DOWNLOAD_RESUME_URL,
         variables: {
           input: {
-            bucket: "jobportal-media-resume",
             key: fileName,
           },
         },
@@ -243,7 +263,7 @@ const ApplicationsPage: React.FC = () => {
   
 
   if (loading) return <Loader/>;
-  if (error) return <p>Error: {error.message}</p>;
+  
 
   return (
     <div className="applicationsPage">
@@ -372,7 +392,7 @@ const ApplicationsPage: React.FC = () => {
               <p><strong>Job Role:</strong> {selectedApplicant.job_title}</p>
               <p><strong>Skills:</strong> {selectedApplicant.skills}</p>
               <p><strong>Status:</strong> {selectedApplicant.status}</p>
-              <p><strong>Resume:</strong><Button variant='outlined' sx={{marginLeft:'10px'}} onClick={() => handleDownloadResume(selectedApplicant.resumeKey)}> Download</Button>  </p>
+              <p><strong>Resume:</strong><Button variant='outlined' sx={{marginLeft:'10px'}} onClick={()=>handleDownloadResume(selectedApplicant.resumeKey)}>Download</Button></p>
             </div>
           </DialogContent>
           <DialogActions>

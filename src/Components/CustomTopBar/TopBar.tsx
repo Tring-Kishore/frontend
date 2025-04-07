@@ -10,7 +10,7 @@ const TopBar = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Safely decode the token when the component mounts
+    
     const token = localStorage.getItem('token');
     if (token) {
       try {
@@ -18,12 +18,12 @@ const TopBar = () => {
         setUserType(decoded.role);
       } catch (error) {
         console.error('Error decoding token:', error);
-        // Handle invalid token (e.g., clear token and redirect to login)
+        
         localStorage.removeItem('token');
         navigate('/signin');
       }
     } else {
-      // If no token is found, redirect to login
+     
       navigate('/signin');
     }
   }, [navigate]);

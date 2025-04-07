@@ -4,7 +4,7 @@ import SideBar from '../../Components/CustomSideBar/SideBar';
 import TopBar from '../../Components/CustomTopBar/TopBar';
 import './Dashboard.scss';
 import { useNavigate } from 'react-router-dom';
-import { verifyToken } from '../Auth/verifyToken';
+
 import { jwtDecode } from 'jwt-decode';
 
 const Dashboard = () => {
@@ -13,7 +13,7 @@ const Dashboard = () => {
     const token = localStorage.getItem('token');
 
     if (token) {
-      const decoded = verifyToken(token);
+       const decoded = jwtDecode(token);
       if (decoded) {
         console.log('Decoded Token:', decoded);
         const { userId, role, name }  : any = decoded;

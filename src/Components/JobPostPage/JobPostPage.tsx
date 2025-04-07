@@ -30,7 +30,6 @@ import {
   GET_JOB_POSTS_QUERY,
   APPLY_FOR_JOB_MUTATION,
   UPDATE_JOB_POST_MUTATION,
-  GET_ADMIN_JOB_POSTS_QUERY,
   UPDATE_JOB_POST_STATUS_MUTATION,
 } from "./JobPostPageAPI/JobPostPageAPI";
 import "./JobPostPage.scss";
@@ -38,8 +37,8 @@ import { jwtDecode } from "jwt-decode";
 import toast from "react-hot-toast";
 import RemoveRedEyeIcon from "@mui/icons-material/RemoveRedEye";
 import CreateIcon from "@mui/icons-material/Create";
-import Loader from "../Loader/Loader";
-import { Label } from "@mui/icons-material";
+import { useNavigate } from "react-router-dom";
+
 
 type UserRole = "user" | "organization" | "admin";
 
@@ -59,9 +58,26 @@ interface JobPost {
 }
 
 const JobPostPage: React.FC = () => {
-  const token: any = localStorage.getItem("token");
-  const decoded: any = jwtDecode(token);
-  const userType: UserRole = decoded.role;
+
+  const navigate = useNavigate();
+  const [userType,setUserType] = useState();
+  const [userId,setUserId] = useState();
+  useEffect(() => {
+      
+      const token = localStorage.getItem('token');
+      if (token) {
+        try {
+          const decoded: any = jwtDecode(token);
+          setUserType(decoded.role);
+          setUserId(decoded.userId);
+        } catch (error) {
+          console.error('Error decoding token:', error);
+          
+          localStorage.removeItem('token');
+          navigate('/signin');
+        }
+      }
+    }, [navigate]);
   const [openAddDialog, setOpenAddDialog] = useState(false);
   const [openEditDialog, setOpenEditDialog] = useState(false);
   const [selectedJob, setSelectedJob] = useState<JobPost | null>(null);
@@ -84,7 +100,7 @@ const JobPostPage: React.FC = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [filteredJobPosts, setFilteredJobPosts] = useState<JobPost[]>([]);
+  
 
   
   const {
@@ -93,7 +109,7 @@ const JobPostPage: React.FC = () => {
     loading: allJobPostsLoading,
   } = useQuery(GET_JOB_ALL_POSTS_QUERY, {
     fetchPolicy: "network-only",
-    skip: userType === "organization", // Only fetch for admin and user
+    skip: userType === "organization", 
   });
 
   const {
@@ -104,7 +120,7 @@ const JobPostPage: React.FC = () => {
     fetchPolicy: "network-only",
     variables: {
       input: {
-        id: decoded.userId,
+        id: userId,
       },
     },
     skip: userType !== "organization",
@@ -173,7 +189,7 @@ const JobPostPage: React.FC = () => {
     const jobPosts = userType === "admin" && statusFilter !== "all"
     ? allPosts.filter((post : any) => post.status === statusFilter)
     : userType === "user"
-    ? allPosts.filter((post : any) => post.status === "approved") // Only show approved to users
+    ? allPosts.filter((post : any) => post.status === "approved") 
     : allPosts;
 
   const paginatedJobPosts = jobPosts.slice(
@@ -193,7 +209,7 @@ const JobPostPage: React.FC = () => {
     setPage(0);
   };
 
-  const handleStatusFilterChange = (event: SelectChangeEvent<string>) => {
+  const handleStatusFilterChange = (event: SelectChangeEvent) => {
     setStatusFilter(event.target.value);
     setPage(0);
   };
@@ -291,7 +307,7 @@ const JobPostPage: React.FC = () => {
             package: submissionData.package,
             language: submissionData.language,
             skills: submissionData.skills,
-            organization_id: decoded.userId,
+            organization_id: userId,
           },
         },
       });
@@ -357,7 +373,7 @@ const JobPostPage: React.FC = () => {
         variables: {
           input: {
             jobpost_id: selectedJob.id,
-            user_id: decoded.userId,
+            user_id: userId,
             organization_id: selectedJob.organization_id,
           },
         },
@@ -608,14 +624,7 @@ const JobPostPage: React.FC = () => {
                     </Select>
                   </FormControl>
 
-                  {/* <TextField
-                    fullWidth
-                    margin="normal"
-                    label="Job Title"
-                    name="job_title"
-                    value={formData.job_title}
-                    onChange={handleInputChange}
-                  /> */}
+                  
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <FormControl fullWidth margin="normal">
@@ -636,14 +645,7 @@ const JobPostPage: React.FC = () => {
                     </Select>
                   </FormControl>
 
-                  {/* <TextField
-                    fullWidth
-                    margin="normal"
-                    label="Category"
-                    name="category"
-                    value={formData.category}
-                    onChange={handleInputChange}
-                  /> */}
+                  
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <TextField
@@ -674,14 +676,7 @@ const JobPostPage: React.FC = () => {
                     </Select>
                   </FormControl>
 
-                  {/* <TextField
-                    fullWidth
-                    margin="normal"
-                    label="Experience"
-                    name="experience"
-                    value={formData.experience}
-                    onChange={handleInputChange}
-                  /> */}
+                  
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <TextField
@@ -782,14 +777,7 @@ const JobPostPage: React.FC = () => {
                     ))}
                   </TextField>
 
-                  {/* <TextField
-                    fullWidth
-                    margin="normal"
-                    label="Job Title"
-                    name="job_title"
-                    value={formData.job_title}
-                    onChange={handleInputChange}
-                  /> */}
+                  
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <TextField
