@@ -30,7 +30,6 @@ import {
   GET_JOB_POSTS_QUERY,
   APPLY_FOR_JOB_MUTATION,
   UPDATE_JOB_POST_MUTATION,
-  GET_ADMIN_JOB_POSTS_QUERY,
   UPDATE_JOB_POST_STATUS_MUTATION,
 } from "./JobPostPageAPI/JobPostPageAPI";
 import "./JobPostPage.scss";
@@ -38,8 +37,8 @@ import { jwtDecode } from "jwt-decode";
 import toast from "react-hot-toast";
 import RemoveRedEyeIcon from "@mui/icons-material/RemoveRedEye";
 import CreateIcon from "@mui/icons-material/Create";
-import Loader from "../Loader/Loader";
-import { Label } from "@mui/icons-material";
+import { useNavigate } from "react-router-dom";
+
 
 type UserRole = "user" | "organization" | "admin";
 
@@ -59,9 +58,26 @@ interface JobPost {
 }
 
 const JobPostPage: React.FC = () => {
-  const token: any = localStorage.getItem("token");
-  const decoded: any = jwtDecode(token);
-  const userType: UserRole = decoded.role;
+
+  const navigate = useNavigate();
+  const [userType,setUserType] = useState();
+  const [userId,setUserId] = useState();
+  useEffect(() => {
+      
+      const token = localStorage.getItem('token');
+      if (token) {
+        try {
+          const decoded: any = jwtDecode(token);
+          setUserType(decoded.role);
+          setUserId(decoded.userId);
+        } catch (error) {
+          console.error('Error decoding token:', error);
+          
+          localStorage.removeItem('token');
+          navigate('/signin');
+        }
+      }
+    }, [navigate]);
   const [openAddDialog, setOpenAddDialog] = useState(false);
   const [openEditDialog, setOpenEditDialog] = useState(false);
   const [selectedJob, setSelectedJob] = useState<JobPost | null>(null);
@@ -84,18 +100,16 @@ const JobPostPage: React.FC = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  
 
-  // GraphQL queries
+  
   const {
-    data: adminJobPostsData,
-    refetch: refetchAdminJobPosts,
-    loading: adminJobPostsLoading,
-  } = useQuery(GET_ADMIN_JOB_POSTS_QUERY, {
+    data: allJobPostsData,
+    refetch: refetchAllJobPosts,
+    loading: allJobPostsLoading,
+  } = useQuery(GET_JOB_ALL_POSTS_QUERY, {
     fetchPolicy: "network-only",
-    variables: {
-      status: statusFilter === "all" ? null : statusFilter,
-    },
-    skip: userType !== "admin",
+    skip: userType === "organization", 
   });
 
   const {
@@ -106,22 +120,13 @@ const JobPostPage: React.FC = () => {
     fetchPolicy: "network-only",
     variables: {
       input: {
-        id: decoded.userId,
+        id: userId,
       },
     },
     skip: userType !== "organization",
   });
 
-  const {
-    data: allJobPostsData,
-    refetch: refetchAllJobPosts,
-    loading: allJobPostsLoading,
-    error,
-  } = useQuery(GET_JOB_ALL_POSTS_QUERY, {
-    fetchPolicy: "network-only",
-    skip: userType !== "user",
-  });
-
+  
   // GraphQL mutations
   const [addJobPost] = useMutation(ADD_JOB_POST_MUTATION, {
     fetchPolicy: "network-only",
@@ -167,7 +172,7 @@ const JobPostPage: React.FC = () => {
   const [updateJobPostStatus] = useMutation(UPDATE_JOB_POST_STATUS_MUTATION, {
     fetchPolicy: "network-only",
     onCompleted: () => {
-      refetchAdminJobPosts();
+      refetchAllJobPosts();
       toast.success("Job post status updated successfully");
       setSelectedJob(null);
     },
@@ -177,12 +182,15 @@ const JobPostPage: React.FC = () => {
   });
 
   // Data processing
-  const jobPosts =
-    userType === "user"
-      ? allJobPostsData?.allJobPosts || []
-      : userType === "organization"
-      ? orgJobPostsData?.jobPosts || []
-      : adminJobPostsData?.adminJobPosts || [];
+  const allPosts = userType === "organization" 
+    ? orgJobPostsData?.jobPosts || []
+    : allJobPostsData?.allJobPosts || [];
+
+    const jobPosts = userType === "admin" && statusFilter !== "all"
+    ? allPosts.filter((post : any) => post.status === statusFilter)
+    : userType === "user"
+    ? allPosts.filter((post : any) => post.status === "approved") 
+    : allPosts;
 
   const paginatedJobPosts = jobPosts.slice(
     page * rowsPerPage,
@@ -198,6 +206,11 @@ const JobPostPage: React.FC = () => {
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
     setRowsPerPage(parseInt(event.target.value));
+    setPage(0);
+  };
+
+  const handleStatusFilterChange = (event: SelectChangeEvent) => {
+    setStatusFilter(event.target.value);
     setPage(0);
   };
 
@@ -241,6 +254,7 @@ const JobPostPage: React.FC = () => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name as string]: value as string }));
   };
+
   const handleSelectChange = (event: SelectChangeEvent) => {
     const { name, value } = event.target;
     setFormData((prev) => ({
@@ -248,6 +262,7 @@ const JobPostPage: React.FC = () => {
       [name as string]: value as string,
     }));
   };
+
   const handleSkillsInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { value } = e.target;
     setFormData((prev) => ({ ...prev, skills: value }));
@@ -292,7 +307,7 @@ const JobPostPage: React.FC = () => {
             package: submissionData.package,
             language: submissionData.language,
             skills: submissionData.skills,
-            organization_id: decoded.userId,
+            organization_id: userId,
           },
         },
       });
@@ -358,7 +373,7 @@ const JobPostPage: React.FC = () => {
         variables: {
           input: {
             jobpost_id: selectedJob.id,
-            user_id: decoded.userId,
+            user_id: userId,
             organization_id: selectedJob.organization_id,
           },
         },
@@ -429,6 +444,25 @@ const JobPostPage: React.FC = () => {
         </Button>
       )}
 
+{userType === "admin" && (
+        <div className="adminControls">
+          <FormControl variant="outlined" style={{ minWidth: 200, marginBottom: 20 }}>
+            <InputLabel>Filter by Status</InputLabel>
+            <Select
+              value={statusFilter}
+              onChange={handleStatusFilterChange}
+              label="Filter by Status"
+            >
+              <MenuItem value="all">All Posts</MenuItem>
+              <MenuItem value="pending">Pending</MenuItem>
+              <MenuItem value="approved">Approved</MenuItem>
+              <MenuItem value="rejected">Rejected</MenuItem>
+              <MenuItem value="waiting_list">Waiting List</MenuItem>
+            </Select>
+          </FormControl>
+        </div>
+      )}
+
       {paginatedJobPosts.length > 0 ? (
         <TableContainer component={Paper} className="jobPostTable">
           <Table>
@@ -443,7 +477,7 @@ const JobPostPage: React.FC = () => {
                 <TableCell align="center" className="tableHeaderContent">
                   Category
                 </TableCell>
-                {userType === "user" && (
+                {(userType === "user" || userType === 'admin') && (
                   <TableCell align="center" className="tableHeaderContent">
                     Company
                   </TableCell>
@@ -454,21 +488,17 @@ const JobPostPage: React.FC = () => {
                 <TableCell align="center" className="tableHeaderContent">
                   Experience
                 </TableCell>
-                {userType === "organization" && (
-                  <TableCell align="center" className="tableHeaderContent">
-                    Actions
-                  </TableCell>
-                )}
-                {userType === "user" && (
-                  <TableCell align="center" className="tableHeaderContent">
-                    Action
-                  </TableCell>
-                )}
-                {userType === "admin" && (
+                {(userType === "admin" || userType === "organization") && (
                   <TableCell align="center" className="tableHeaderContent">
                     Status
                   </TableCell>
                 )}
+                
+                  <TableCell align="center" className="tableHeaderContent">
+                    Action
+                  </TableCell>
+                
+                
               </TableRow>
             </TableHead>
             <TableBody>
@@ -483,7 +513,7 @@ const JobPostPage: React.FC = () => {
                   <TableCell align="center" className="tableBodyConent">
                     {post.category}
                   </TableCell>
-                  {userType === "user" && (
+                  {(userType === "user" || userType === 'admin') && (
                     <TableCell align="center" className="tableBodyConent">
                       {post.organization_name || "N/A"}
                     </TableCell>
@@ -494,6 +524,18 @@ const JobPostPage: React.FC = () => {
                   <TableCell align="center" className="tableBodyConent">
                     {post.experience}
                   </TableCell>
+                  {(userType === "admin" || userType==='organization') && (
+                  <TableCell align="center" className="tableBodyConent">
+                    <Chip
+                      label={post.status}
+                      color={
+                        post.status === "approved" ? "success" :
+                        post.status === "rejected" ? "error" :
+                        post.status === "waiting_list" ? "warning" : "default"
+                      }
+                    />
+                  </TableCell>
+                )}
                   {userType === "organization" && (
                     <TableCell align="center" className="tableBodyConent">
                       <Button
@@ -519,7 +561,8 @@ const JobPostPage: React.FC = () => {
                       </Button>
                     </TableCell>
                   )}
-                  {userType === "user" && (
+                  
+                  {(userType === "user" || userType === 'admin') && (
                     <TableCell className="tableBodyConent">
                       <Button
                         variant="contained"
@@ -531,11 +574,7 @@ const JobPostPage: React.FC = () => {
                       </Button>
                     </TableCell>
                   )}
-                  {userType === "admin" && (
-                    <TableCell align="center" className="tableBodyConent">
-                      {post.status}
-                    </TableCell>
-                  )}
+                  
                 </TableRow>
               ))}
             </TableBody>
@@ -552,25 +591,6 @@ const JobPostPage: React.FC = () => {
         </TableContainer>
       ) : (
         <div className="noDataMessage">No data Found</div>
-      )}
-
-      {userType === "admin" && (
-        <div className="adminControls">
-          <TextField
-            select
-            label="Filter by Status"
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            variant="outlined"
-            style={{ minWidth: 200, marginBottom: 20 }}
-          >
-            <MenuItem value="all">All Posts</MenuItem>
-            <MenuItem value="requested">Requested</MenuItem>
-            <MenuItem value="approved">Approved</MenuItem>
-            <MenuItem value="rejected">Rejected</MenuItem>
-            <MenuItem value="waiting_list">Waiting List</MenuItem>
-          </TextField>
-        </div>
       )}
 
       {/* Add Job Dialog */}
@@ -604,14 +624,7 @@ const JobPostPage: React.FC = () => {
                     </Select>
                   </FormControl>
 
-                  {/* <TextField
-                    fullWidth
-                    margin="normal"
-                    label="Job Title"
-                    name="job_title"
-                    value={formData.job_title}
-                    onChange={handleInputChange}
-                  /> */}
+                  
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <FormControl fullWidth margin="normal">
@@ -632,14 +645,7 @@ const JobPostPage: React.FC = () => {
                     </Select>
                   </FormControl>
 
-                  {/* <TextField
-                    fullWidth
-                    margin="normal"
-                    label="Category"
-                    name="category"
-                    value={formData.category}
-                    onChange={handleInputChange}
-                  /> */}
+                  
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <TextField
@@ -670,14 +676,7 @@ const JobPostPage: React.FC = () => {
                     </Select>
                   </FormControl>
 
-                  {/* <TextField
-                    fullWidth
-                    margin="normal"
-                    label="Experience"
-                    name="experience"
-                    value={formData.experience}
-                    onChange={handleInputChange}
-                  /> */}
+                  
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <TextField
@@ -763,7 +762,7 @@ const JobPostPage: React.FC = () => {
               <Grid container spacing={2}>
                 <Grid item xs={12} sm={6}>
                   <TextField
-                    select 
+                    select
                     fullWidth
                     margin="normal"
                     label="Job Title"
@@ -778,14 +777,7 @@ const JobPostPage: React.FC = () => {
                     ))}
                   </TextField>
 
-                  {/* <TextField
-                    fullWidth
-                    margin="normal"
-                    label="Job Title"
-                    name="job_title"
-                    value={formData.job_title}
-                    onChange={handleInputChange}
-                  /> */}
+                  
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <TextField
@@ -802,7 +794,7 @@ const JobPostPage: React.FC = () => {
                         {category.label}
                       </MenuItem>
                     ))}
-                    </TextField>
+                  </TextField>
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <TextField
@@ -813,8 +805,6 @@ const JobPostPage: React.FC = () => {
                     value={formData.openings}
                     onChange={handleInputChange}
                   />
-                    
-                    
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <TextField
@@ -826,10 +816,12 @@ const JobPostPage: React.FC = () => {
                     value={formData.experience}
                     onChange={handleInputChange}
                   >
-                    {experienceOptions.map((exp)=> (
-                      <MenuItem key={exp.value} value={exp.value}>{exp.label}</MenuItem>
+                    {experienceOptions.map((exp) => (
+                      <MenuItem key={exp.value} value={exp.value}>
+                        {exp.label}
+                      </MenuItem>
                     ))}
-                    </TextField>
+                  </TextField>
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <TextField
@@ -955,26 +947,29 @@ const JobPostPage: React.FC = () => {
             </Button>
           )}
           {userType === "admin" && (
-            <>
+            <div style={{ display: "flex", gap: "10px", marginTop: "20px" }}>
               <Button
+                variant={selectedJob?.status === "approved" ? "contained" : "outlined"}
+                color="success"
                 onClick={() => handleUpdateStatus("approved")}
-                color="primary"
               >
                 Approve
               </Button>
               <Button
-                onClick={() => handleUpdateStatus("rejected")}
+                variant={selectedJob?.status === "rejected" ? "contained" : "outlined"}
                 color="error"
+                onClick={() => handleUpdateStatus("rejected")}
               >
                 Reject
               </Button>
               <Button
+                variant={selectedJob?.status === "waiting_list" ? "contained" : "outlined"}
+                color="warning"
                 onClick={() => handleUpdateStatus("waiting_list")}
-                color="secondary"
               >
                 Waiting List
               </Button>
-            </>
+            </div>
           )}
         </DialogActions>
       </Dialog>

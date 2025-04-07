@@ -32,8 +32,8 @@
         align-items: center;
         padding: 35px;
         border-radius: 12px;
-        width: 100%; // Make the form take full width
-        max-width: 460px; // Set a max-width for larger screens
+        width: 100%; 
+        max-width: 460px; 
         background-color: white;
         .logoContainer{
           display: flex;
@@ -41,10 +41,10 @@
         }
         .signUpHeading {
           font-size: 33px;
-          // color: #605DEC; // Primary color
+          
           color: #303C6C;
           margin-top: 15px;
-          // align-items: center;
+        
         }
         .groupBtns {
           display: flex;
@@ -85,8 +85,7 @@
             width: 100%;
             height: 38px;
             border: none;
-            // background-color: #605dec14; //
-            // outline-color: #605DEC; // Primary color for outline
+            
             outline-color: #303C6C;
             border-bottom: lightgrey;
             border-style: solid;
@@ -104,14 +103,13 @@
           display: flex;
           align-items: center;
           justify-content: center;
-          // position: relative;
-          // left: 39px;
+        
           .btnSignUp {
 
             width: 100%;
             height: 40px;
             background-color: #303C6C;
-            // background-color: #605DEC; 
+           
             color: #FAFAFA; 
             border: none;
             cursor: pointer;
@@ -128,11 +126,11 @@
   
           a {
             color: #303C6C;
-            // color: #605DEC;
+           
             text-decoration: none;
   
             &:hover {
-              text-decoration: underline; // Hover effect
+              text-decoration: underline; 
             }
           }
         }
@@ -140,17 +138,17 @@
     }
   }
   
-  // Media Queries
+ 
   @media (max-width: 768px) {
     .borderSignup {
-      padding: 25px; // Reduce padding for smaller screens
+      padding: 25px; 
   
       .SignUpinputs {
-        height: 35px; // Slightly reduce input height
+        height: 35px;
       }
   
       .btnSignUp {
-        height: 38px; // Slightly reduce button height
+        height: 38px;
       }
     }
   }
@@ -160,15 +158,16 @@
       padding: 20px;
   
       .SignUpinputs {
-        height: 32px; // Further reduce input height
+        height: 32px; 
       }
   
       .btnSignUp {
-        height: 36px; // Further reduce button height
+        height: 36px;
       }
   
       .SignUpPara {
-        font-size: 14px; // Reduce font size for smaller screens
+        font-size: 14px; 
       }
     }
   }
+  

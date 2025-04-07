@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery, useMutation } from "@apollo/client";
 import {
@@ -129,8 +129,7 @@ const UserDetails = () => {
       const originalName = file.name.split('.').slice(0, -1).join('.').replace(/\s+/g, '_');
       const extension = file.name.split('.').pop();
 
-      if(extension !== 'pdf')
-      {
+      if(extension !== 'pdf'){
         toast.error('Only PDF files are allowed');
         return;
       }
@@ -194,7 +193,6 @@ const UserDetails = () => {
         query: GET_DOWNLOAD_RESUME_URL,
         variables: {
           input: {
-            bucket: "jobportal-media-resume",
             key: user.resumeKey,
           },
         },
@@ -205,18 +203,6 @@ const UserDetails = () => {
     } catch (error) {
       console.error("Error downloading resume:", error);
       toast.error("Failed to download resume.");
-    }
-  };
-
-  const handleDeleteResume = async () => {
-    try {
-      await deleteResume({
-        variables: {
-          input: { id: userId },
-        },
-      });
-    } catch (error) {
-      console.error("Error deleting resume:", error);
     }
   };
 

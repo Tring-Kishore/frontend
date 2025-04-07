@@ -124,6 +124,7 @@ const SignUp: React.FC = () => {
       setSuccess(true);
       setError(null);
       console.log('User signup successful!', data);
+      toast.success('User signup successful!');
       setTimeout(() => {
         navigate('/signin');
       }, 2000);
@@ -161,7 +162,7 @@ const SignUp: React.FC = () => {
         variables: { 
           input: {
             ...data,
-            role: 'user' // Add role field
+            role: 'user'
           } 
         } 
       }).catch((err) => {
@@ -180,7 +181,7 @@ const SignUp: React.FC = () => {
         email,
         phone,
         password,
-        role: 'organization', // Add role field
+        role: 'organization', 
       };
       signUpOrganization({
         variables: {

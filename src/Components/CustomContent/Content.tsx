@@ -73,6 +73,7 @@ interface JobPost {
   experience: number;
   organization_id: string;
   organization_name?: string;
+  status?:string
 }
 
 interface Company {
@@ -175,12 +176,11 @@ const Content: React.FC = () => {
   ]);
 
   // Get job posts data based on user type
-  const jobPosts = userType === "user" 
-    ? jobPostData?.allJobPosts || []
+  const jobPosts = (userType === "user" 
+    ? jobPostData?.allJobPosts?.filter((post: JobPost) => post.status === "approved") 
     : userType === "organization"
-      ? jobPostData?.jobPosts || []
-      : [];
-
+      ? jobPostData?.jobPosts 
+      : []) || [];
   const companies = userType === "admin" ? companyData?.getAllOrganizations || [] : [];
 
   const handleChangePage = (event: unknown, newPage: number) => {
