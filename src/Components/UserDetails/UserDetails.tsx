@@ -65,6 +65,7 @@ const UserDetails = () => {
   const [updateUser] = useMutation(UPDATE_USER_MUTATION, {
     onCompleted: () => {
       toast.success("User details updated successfully!");
+      navigate('/dashboard');
       refetch();
     },
     onError: (err) => {
@@ -72,16 +73,6 @@ const UserDetails = () => {
     },
   });
 
-  const [deleteResume] = useMutation(DELETE_RESUME_MUTATION, {
-    onCompleted: () => {
-      toast.success("Resume deleted successfully!");
-      setUser((prev) => ({ ...prev, resumeUrl: "", resumeKey: "" }));
-      refetch();
-    },
-    onError: (err) => {
-      toast.error(err.message);
-    },
-  });
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>

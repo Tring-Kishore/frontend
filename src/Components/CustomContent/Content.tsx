@@ -97,7 +97,7 @@ const Content: React.FC = () => {
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [countCards, setCountCards] = useState<CountCard[]>(CountCards);
 
-  // Count queries
+  
   const { data: countOrganizations, loading: loadingCountOrganizations } = useQuery(COUNT_ORGANIZATIONS, { fetchPolicy: "network-only" });
   const { data: countUsers, loading: loadingCountUsers } = useQuery(COUNT_USERS, { fetchPolicy: "network-only" });
   const { data: countJobPosts, loading: loadingCountJobPosts } = useQuery(COUNT_JOB_POSTS, { fetchPolicy: "network-only" });
@@ -120,7 +120,7 @@ const Content: React.FC = () => {
     }  },
   });
 
-  // Job posts query
+  
   const { data: jobPostData, loading: loadingJobPosts } = useQuery(
     userType === "user" ? GET_JOB_ALL_POSTS_QUERY : GET_JOB_POSTS_QUERY,
     {
@@ -134,7 +134,7 @@ const Content: React.FC = () => {
     }
   );
 
-  // Companies query (for admin)
+  
   const { data: companyData, loading: loadingCompanies } = useQuery(
     GET_ALL_ORGANIZATIONS,
     {
@@ -143,7 +143,6 @@ const Content: React.FC = () => {
     }
   );
 
-  // Update count cards
   useEffect(() => {
     const updatedCountCards = CountCards.map((card) => {
       switch (card.id) {
@@ -175,7 +174,7 @@ const Content: React.FC = () => {
     countOrganizationJobPosts,
   ]);
 
-  // Get job posts data based on user type
+  
   const jobPosts = (userType === "user" 
     ? jobPostData?.allJobPosts?.filter((post: JobPost) => post.status === "approved") 
     : userType === "organization"

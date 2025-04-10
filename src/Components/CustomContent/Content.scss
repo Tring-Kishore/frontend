@@ -85,4 +85,37 @@
       }
     }
   }
-  
+
+
+  @media screen and (max-width: 768px) {
+    .countDivs{
+      flex-direction: column;
+    }
+    .staticContent{
+      font-size: 20px !important;
+    }
+    .dynamicContent{
+      font-size: 28px !important;
+    }
+    .imageSection img{
+      width: 220px;
+      height: 100%;
+      object-fit: cover;
+    }
+    .table{
+      margin-top: 53px;
+      h1{ 
+        font-size: 25px;
+      }
+    }
+  }
+  @media screen and (max-width:988px) {
+    .staticContent{
+      font-size: 30px !important;
+      text-align: center;
+    }
+    .dynamicContent{
+      font-size: 40px !important;
+    }
+
+  }

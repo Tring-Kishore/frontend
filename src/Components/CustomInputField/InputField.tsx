@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import VisibilityIcon from '@mui/icons-material/Visibility';
+import './InputField.scss';
 type InputFieldProps = {
   name: string;
   id: string;
@@ -29,7 +30,7 @@ const InputField: React.FC<InputFieldProps> = ({
   };
 
   return (
-    <div style={{ position: 'relative' }}>
+    <div className='inputField'>
       
       <input
         id={id}
@@ -42,16 +43,8 @@ const InputField: React.FC<InputFieldProps> = ({
 
       
       {type === 'password' && (
-        <span
-          style={{
-            position: 'absolute',
-            right: '10px',
-            top: '50%',
-            transform: 'translateY(-65%)',
-            cursor: 'pointer',
-            fontSize: '18px',
-            userSelect: 'none',
-          }}
+        <span className='eyeIcon'
+          
           onClick={togglePasswordVisibility}
         >
           {showPassword ? <VisibilityOffIcon/> : <VisibilityIcon/>}
@@ -60,10 +53,7 @@ const InputField: React.FC<InputFieldProps> = ({
 
       
       {errors && errors[name] && (
-        <p
-          className="error-message"
-          style={{ color: 'red', fontSize: '12px', marginTop: '4px' }}
-        >
+        <p className="error-message">
           {errors[name].message}
         </p>
       )}

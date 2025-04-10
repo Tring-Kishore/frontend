@@ -1,27 +1,6 @@
 import React, { useEffect, useState } from "react";
-import {
-  Button,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  TablePagination,
-  Grid,
-  MenuItem,
-  Chip,
-  Box,
-  InputLabel,
-  Select,
-  FormControl,
-  SelectChangeEvent,
+import {Button,Paper,Table,TableBody,TableCell,TableContainer,TableHead,TableRow,Dialog,DialogTitle,DialogContent,DialogActions,TextField,TablePagination,
+  Grid,MenuItem,Chip,Box,InputLabel,Select,FormControl,SelectChangeEvent,
 } from "@mui/material";
 import { useQuery, useMutation } from "@apollo/client";
 import {
@@ -127,7 +106,7 @@ const JobPostPage: React.FC = () => {
   });
 
   
-  // GraphQL mutations
+  
   const [addJobPost] = useMutation(ADD_JOB_POST_MUTATION, {
     fetchPolicy: "network-only",
     onCompleted: () => {
@@ -181,7 +160,7 @@ const JobPostPage: React.FC = () => {
     },
   });
 
-  // Data processing
+  
   const allPosts = userType === "organization" 
     ? orgJobPostsData?.jobPosts || []
     : allJobPostsData?.allJobPosts || [];
@@ -197,7 +176,7 @@ const JobPostPage: React.FC = () => {
     page * rowsPerPage + rowsPerPage
   );
 
-  // Handlers
+  
   const handleChangePage = (event: unknown, newPage: number) => {
     setPage(newPage);
   };
