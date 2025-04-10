@@ -1,3 +1,4 @@
+
 body{
     margin: 0;
     padding: 0;
@@ -95,10 +96,27 @@ body{
                 }
             }
         }
+        .tabLabel{
+            display: flex;
+            align-items: center;
+        }
     }
     .mainContent{
         height: 100%;
         width: 80%;
         background-color: lightcyan;
+
+        span{
+            margin-left: 8px;
+        }
+    }
+}
+
+@media screen and (max-width:988px){
+    .overlay{
+        display: flex;
+        justify-content: end;
+        width: 100%;
+        
     }
 }

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Box, Tabs, Tab } from '@mui/material';
 import './SideBar.scss';
@@ -17,7 +17,7 @@ type SideBarOption = {
   roles: UserRole[];
 };
 
-const SideBarOptions: SideBarOption[] = [
+export const SideBarOptions: SideBarOption[] = [
   {
     id: 'dashboard',
     label: 'Dashboard',
@@ -56,13 +56,13 @@ const SideBar = () => {
   const userRole: UserRole = decoded.role;
   const navigate = useNavigate();
   const filterOptions = SideBarOptions.filter((option) => option.roles.includes(userRole));
-
   const [value, setValue] = React.useState(0);
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
     handleNavigation(filterOptions[newValue].id);
   };
+  
 
   const handleNavigation = (id: string) => {
     switch (id) {
@@ -94,6 +94,7 @@ const SideBar = () => {
   }
 
   return (
+    <>
     <div className="fullPage">
       <div className="sideBar">
         <div className="logoContainer">
@@ -124,8 +125,8 @@ const SideBar = () => {
                   letterSpacing:'1px'
                 }}
                 label={
-                  <div style={{ display: 'flex', alignItems: 'center' }}>
-                    <span style={{ marginLeft: '8px' }}>{option.label}</span>
+                  <div className='tabLabel'>
+                    <span>{option.label}</span>
                   </div>
                 }
               />
@@ -133,7 +134,9 @@ const SideBar = () => {
           </Tabs>
         </Box>
       </div>
+      
     </div>
+    </>
   );
 };
 

@@ -3,7 +3,7 @@ import { setContext } from '@apollo/client/link/context';
 import { onError } from '@apollo/client/link/error';
 import toast from 'react-hot-toast';
 const httpLink = createHttpLink({
-  uri: 'http://localhost:4000/graphql',
+  uri: process.env.REACT_APP_HTTP_LINK || 'http://localhost:4000/graphql',
 });
 const errorLink = onError(({ graphQLErrors }) => {
   
@@ -18,7 +18,6 @@ const errorLink = onError(({ graphQLErrors }) => {
   }
 });
 const logout = () => {
-    
     toast.error('Login Expired');
     window.location.href = '/signin';
     localStorage.removeItem('token');

@@ -114,15 +114,11 @@ const SignUp: React.FC = () => {
     formState: { errors },
   } = useForm<FormData>();
   const [userType, setUserType] = useState<UserType>('user');
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<boolean>(false);
 
   const navigate = useNavigate();
 
   const [signUpUser, { loading: userLoading }] = useMutation(SIGNUP_MUTATION, {
     onCompleted: (data) => {
-      setSuccess(true);
-      setError(null);
       console.log('User signup successful!', data);
       toast.success('User signup successful!');
       setTimeout(() => {
@@ -131,15 +127,11 @@ const SignUp: React.FC = () => {
     },
     onError: (err) => {
       console.error('User signup failed:', err);
-      setError(err.message);
-      setSuccess(false);
     },
   });
 
   const [signUpOrganization, { loading: orgLoading }] = useMutation(SIGNUP_ORGANIZATION_MUTATION, {
     onCompleted: (data) => {
-      setSuccess(true);
-      setError(null);
       console.log('Organization signup successful!', data);
       toast.success('Organization Signup successfully!');
       setTimeout(() => {
@@ -148,8 +140,6 @@ const SignUp: React.FC = () => {
     },
     onError: (err) => {
       console.error('Organization signup failed:', err);
-      setError(err.message);
-      setSuccess(false);
       toast.error('Oganization signup Failed');
     },
   });

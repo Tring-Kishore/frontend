@@ -27,3 +27,16 @@
     }
   }
   
+
+  @media screen and (max-width:988px) {
+    .sideBarContainer{
+      display: none;
+    }
+    .mainContent{
+      width: 100% !important;
+    }
+    .topBarContainer{
+        
+    }
+  
+  }

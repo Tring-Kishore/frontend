@@ -1,3 +1,46 @@
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: black; 
+    z-index: 1000; 
+    cursor: pointer;
+    .closeIcon {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        cursor: pointer;
+        z-index: 1001;
+        
+        &:hover {
+            opacity: 0.8;
+        }
+    }
+    .optionNames {
+        text-align: center;
+        display: flex;
+        width: 100%;
+        justify-content: left;
+        align-items: center;
+        flex-direction: column;
+        .options {
+          max-height: 100px;
+          width: 100%;
+          color: white;
+          padding: 20px;
+          font-size: xx-large;
+          cursor: pointer;
+          transition: background-color 0.3s ease, color 0.3s ease;
+          
+          &:hover {
+            background-color: rgba(255, 255, 255, 0.442); 
+            color: black !important;
+          }
+        }
+      }
+  }
 .topBar{
     width: 99%;
     display: flex;
@@ -7,6 +50,14 @@
     h3{
         font-size: 19px;
         font-weight: 800;
+    }
+    .logoContainer{
+        display: none;
+        img{
+            width: 120px;
+    height: 55px;
+    padding: 2px;
+        }
     }
     
     .searchBar{
@@ -74,3 +125,24 @@
         }
     }
 }   
+
+.hamburger{
+    display: none;
+}
+@media screen and (max-width:988px){
+    .profile{
+        display: none !important;
+    }
+    .hamburger{
+        display: flex;
+    }
+    .options{
+        font-size: 27px !important;
+    }
+    .heading{
+        display: none !important;
+    }
+    .logoContainer{
+        display: flex !important;
+    }
+}
